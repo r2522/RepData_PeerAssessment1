@@ -12,6 +12,7 @@ rm(list=ls())
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(httpuv)
 # Loading
 setwd("~/Desktop/Coursera")
 activity <- read.csv("activity.csv", header=TRUE, na.strings = "NA")
