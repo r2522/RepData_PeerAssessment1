@@ -7,19 +7,91 @@ output:
 
 
 ## Loading and preprocessing the data
-
+# Clean & load Libraries
+rm(list=ls())
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+# Loading
+setwd("~/Desktop/Coursera")
+activity <- read.csv("activity.csv", header=TRUE, na.strings = "NA")
+# reasign date class
+activity$date <- ymd(activity$date)
+# Remove NA
+activityclean <- na.omit(activity)
 
 
 ## What is mean total number of steps taken per day?
-
+# Summarize data
+activitysum <- summarize(group_by(activityclean,date),daily.steps=sum(steps))
+activitysum # gives the total number of steps taken per day
+# Plot histogram
+histplot = qplot(activitysum$daily.steps, binwidth = 1000, main = "Total number of steps taken each day", xlab= "Daily Steps", ylab = "Frequency", col=I("red"), alpha=I(.2), fill=I("blue"))
+histplot
+dev.copy(png,"Histogram 1.png", width=480, height=480)
+dev.off()
+# Calculating Mean & Median (it is necessary to coerce to an integer)
+stepsmean = as.integer (mean(activitysum$daily.steps)) 
+stepsmean 
+# total number of steps taken per day is 10766
+stepsmedian = as.integer (median(activitysum$daily.steps))
+stepsmedian 
+# total number of steps taken per day is 10765
 
 
 ## What is the average daily activity pattern?
-
+# Summarize data
+aveday <-summarize(group_by(activityclean,interval),mean.steps=mean(steps))
+View(aveday)
+# Plot average number of steps by 5-minute interval
+seriesplot <- ggplot(data = aveday, aes(x = interval, y = mean.steps)) + geom_line(color="red")+ labs(title="Average Number of Steps Taken vs 5-min Interval", y="Average Number of Steps", x="5-min Interval")
+seriesplot
+dev.copy(png,"Times Series 1.png", width=480, height=480)
+dev.off()
+# Calculating which 5-minute interval,contains the maximum number of steps
+maxposition <- which.max(aveday$mean.steps)
+peak <- aveday$interval[maxposition]
+peak 
+# Maximum number of steps is 835
 
 
 ## Imputing missing values
-
+# Calculating missing values
+sum(is.na(activity)) 
+#Total number of missing values in the origina dataset is 2304
+# Devise a strategy for filling in all of the missing values in the dataset:
+# NA's will be substituted by the steps' mean value (without NA's)
+filled.activity <- activity
+filled.activity$steps[is.na(filled.activity$steps)] <- mean(filled.activity$steps,na.rm=TRUE)
+# Create a new dataset that is equal to the original dataset but with the missing data filled in
+colSums(is.na(filled.activity)) # To check there is no "NA's"
+# Creating New Histogram:
+# Summarize data
+filled.activity2 <- summarize(group_by(filled.activity,date),daily.steps=sum(steps))
+# Calculating the Mean
+mean.filled   <- as.integer(mean(filled.activity2$daily.steps))
+mean.filled # Mean = 10766
+# Calculating the Median
+median.filled   <- as.integer(median(filled.activity2$daily.steps))
+median.filled # Median = 10766
+# Plotting
+histplot2 = qplot(filled.activity2$daily.steps, binwidth = 1000, main = "Total number of steps taken each day", xlab= "Daily Steps", ylab = "Frequency", col=I("red"), alpha=I(.2), fill=I("blue"))
+histplot2
+dev.copy(png,"Histogram 2.png", width=480, height=480)
+dev.off()
+# After NA's substitution, the Mean and Median become the same. 
+# Filling with mean values make the histogram more normally distributed.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+# Create a new factor variable in the dataset with two levels – “weekday” and “weekend”
+filled.activity$day <- ifelse(weekdays(filled.activity$date) %in% c("Saturday","Sunday"), "weekday", "weekend")
+
+# Preparing data for ggplot (Summarizing)
+filled.activity2 <- summarize(group_by(filled.activity,interval,day),steps.mean=mean(steps))
+
+# Plotting
+weekday.interval <- ggplot (filled.activity2, aes(x=interval, y=steps.mean, color=day)) + facet_grid(day~.) + geom_line() + labs (title="Average number of steps taken in 5-min interval", y="Average number of steps", x="5-min interval")
+weekday.interval
+dev.copy(png,"Times Series 2.png", width=480, height=480)
+dev.off()
