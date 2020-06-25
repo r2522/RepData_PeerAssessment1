@@ -142,7 +142,7 @@ seriesplot <- ggplot(data = aveday, aes(x = interval, y = mean.steps)) + geom_li
 seriesplot
 ```
 
-![](PA1_template_files/figure-html/1.Time Series-1.png)<!-- -->
+![](PA1_template_files/figure-html/1.Timeseries-1.png)<!-- -->
 
 Calculating which 5-minute interval,contains the maximum number of steps
 
@@ -249,6 +249,6 @@ weekday.interval <- ggplot (filled.activity2, aes(x=interval, y=steps.mean, colo
 weekday.interval
 ```
 
-![](PA1_template_files/figure-html/2.Times Series-1.png)<!-- -->
+![](PA1_template_files/figure-html/2.Timeseries-1.png)<!-- -->
 
 
